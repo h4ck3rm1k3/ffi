@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2008-2010 Wayne Meissner
 #
@@ -29,6 +30,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.#
 
 module FFI
+
+  class FakeModule
+
+    def FakeFunction (*args)
+    end
+
+    def find_function(x)
+      return method(:FakeFunction)
+    end
+  end
+
   CURRENT_PROCESS = USE_THIS_PROCESS_AS_LIBRARY = Object.new
 
   # @param [#to_s] lib library name
@@ -143,9 +155,10 @@ module FFI
           end
 
           if lib.nil?
-            raise LoadError.new(errors.values.join(".\n"))
+            #raise LoadError.new(errors.values.join(".\n"))
+            lib = FakeModule.new()
           end
-
+          
           # return the found lib
           lib
         end
@@ -260,7 +273,7 @@ module FFI
             raise LoadError unless function
 
             invokers << if arg_types.length > 0 && arg_types[arg_types.length - 1] == FFI::NativeType::VARARGS
-              VariadicInvoker.new(function, arg_types, find_type(ret_type), options)
+              #VariadicInvoker.new(function, arg_types, find_type(ret_type), options)
 
             else
               Function.new(find_type(ret_type), arg_types, function, options)
@@ -271,9 +284,9 @@ module FFI
         end
       end
       invoker = invokers.compact.shift
-      raise FFI::NotFoundError.new(cname.to_s, ffi_libraries.map { |lib| lib.name }) unless invoker
+      #raise FFI::NotFoundError.new(cname.to_s, ffi_libraries.map { |lib| lib.name }) unless invoker
 
-      invoker.attach(self, mname.to_s)
+      #invoker.attach(self, mname.to_s)
       invoker
     end
 
